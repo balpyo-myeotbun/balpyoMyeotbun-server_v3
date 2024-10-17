@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error Logs</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .table-container {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Error Logs</h1>
+    <div class="table-container">
+        <table class="table table-striped w-auto">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Error Text</th>
+                <th>Class Name</th>
+                <th>Method Name</th>
+                <th>Line Number</th>
+                <th>Created At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${errorLogs}">
+                <td th:text="${log.id}"></td>
+                <td th:text="${log.errorText}"></td>
+                <td th:text="${log.className}"></td>
+                <td th:text="${log.methodName}"></td>
+                <td th:text="${log.lineNumber}"></td>
+                <td th:text="${log.createdAt}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

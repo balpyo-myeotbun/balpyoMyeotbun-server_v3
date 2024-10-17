@@ -9,7 +9,7 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import site.balpyo.script.dto.ScriptDto;
-import site.balpyo.script.service.ScriptServiceImpl;
+import site.balpyo.script.service.ScriptService;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class GenerateScriptService {
 
     private static final String ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
-    private final ScriptServiceImpl scriptService;
+    private final ScriptService scriptService;
 
     @Value("${spring.ai.openai.api-key}")
     String apiKey;

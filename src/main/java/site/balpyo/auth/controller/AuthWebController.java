@@ -19,7 +19,7 @@ public class AuthWebController {
     @GetMapping("/verify")
     public String verifyUser(@RequestParam(value = "uid", required = false)String uid , Model model) {
         model.addAttribute("uid", uid);
-        return "verify";
+        return "verify.html";
     }
 
 }

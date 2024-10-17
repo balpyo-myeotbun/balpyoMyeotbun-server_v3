@@ -5,7 +5,7 @@ import site.balpyo.ai.service.GenerateScriptService;
 import site.balpyo.script.dto.ScriptDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import site.balpyo.script.service.ScriptServiceImpl;
+import site.balpyo.script.service.ScriptService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 public class ScriptController {
 
     @Autowired
-    private ScriptServiceImpl service;
+    private ScriptService service;
 
     @Autowired
     private GenerateScriptService aiService;
@@ -30,6 +30,16 @@ public class ScriptController {
     public ScriptDto getScriptById(@PathVariable Long id) {
         return service.getScriptById(id);
     }
+
+
+    @GetMapping("/search")
+    public List<ScriptDto> getScriptByTagAndIsGenerating(
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) Boolean isGenerating) {
+        // tag와 isGenerating 값을 기준으로 검색
+        return service.getAllScriptByTagAndIsGenerating(tag, isGenerating);
+    }
+
 
     @Operation(summary = "자체 스크립트 생성")
     @PostMapping
@@ -58,4 +68,5 @@ public class ScriptController {
     public void deleteScript(@PathVariable Long id) {
         service.deleteScript(id);
     }
+
 }
