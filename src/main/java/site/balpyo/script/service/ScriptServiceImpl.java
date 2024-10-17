@@ -1,6 +1,7 @@
 package site.balpyo.script.service;
 
 import site.balpyo.script.dto.ScriptDto;
+import site.balpyo.script.entity.ETag;
 import site.balpyo.script.entity.Script;
 import site.balpyo.script.repository.ScriptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ public class ScriptServiceImpl {
 
     @Autowired
     private ScriptRepository repository;
+    private SpeechMarkUtil speechMarkUtil;
 
     // Get all scripts and convert them to ScriptDto
     public List<ScriptDto> getAllScripts() {
@@ -29,8 +31,10 @@ public class ScriptServiceImpl {
     }
 
 
+
     public ScriptDto createScript(ScriptDto scriptDto) {
         Script script = scriptDto.toEntity();
+        script.setTags(ETag.SCRIPT.name());
         Script savedScript = repository.save(script);
         return savedScript.toDto();
     }
@@ -39,7 +43,6 @@ public class ScriptServiceImpl {
     public ScriptDto updateScript(Long id, ScriptDto scriptDto) {
         return repository.findById(id)
                 .map(existingScript -> {
-
                     Script updatedScript = scriptDto.toEntity();
                     updatedScript.setScriptId(existingScript.getScriptId());
                     Script savedScript = repository.save(updatedScript);

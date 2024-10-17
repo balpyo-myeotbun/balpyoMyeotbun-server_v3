@@ -56,7 +56,6 @@ public class ScriptDto {
         script.setKeywords(this.keywords);
         script.setFcmToken(this.fcmToken);
         script.setProfileUrl(this.profileUrl);
-        script.setSpeechMarks(this.speechMarks);
 
         return script;
     }

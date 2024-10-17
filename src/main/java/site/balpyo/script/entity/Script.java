@@ -68,9 +68,6 @@ public class Script {
     private String fcmToken;
     private String profileUrl;
 
-    private String speechMarks;
-
-
     public ScriptDto toDto() {
         ScriptDto scriptDto = new ScriptDto();
         scriptDto.setScriptId(this.scriptId);
@@ -90,7 +87,6 @@ public class Script {
         scriptDto.setKeywords(this.keywords);
         scriptDto.setFcmToken(this.fcmToken);
         scriptDto.setProfileUrl(this.profileUrl);
-        scriptDto.setSpeechMarks(this.speechMarks);
 
         return scriptDto;
     }
