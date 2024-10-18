@@ -6,17 +6,23 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import site.balpyo.ai.service.PollyService;
 import site.balpyo.auth.entity.User;
 import site.balpyo.script.dto.ScriptDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static site.balpyo.script.service.SpeechMarkUtil.parseSpeechMarks;
+
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
+@NoArgsConstructor(force = true)
 public class Script {
+
+    @Transient
+    private final PollyService pollyService;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,6 +74,10 @@ public class Script {
     private String fcmToken;
     private String profileUrl;
 
+    public Script(PollyService pollyService) {
+        this.pollyService = pollyService;
+    }
+
     public ScriptDto toDto() {
         ScriptDto scriptDto = new ScriptDto();
         scriptDto.setScriptId(this.scriptId);
@@ -78,7 +88,7 @@ public class Script {
         scriptDto.setIsGenerating(this.isGenerating);
         scriptDto.setFilePath(this.filePath);
         scriptDto.setPlayTime(this.playTime);
-        scriptDto.setSpeechMark(this.speechMark);
+        scriptDto.setSpeechMark(parseSpeechMarks(this.speechMark));
         scriptDto.setOriginalScript(this.originalScript);
         scriptDto.setSpeed(this.speed);
         scriptDto.setUseAi(this.useAi);

@@ -1,12 +1,11 @@
 package site.balpyo.script.service;
 
-import org.hibernate.mapping.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import site.balpyo.script.entity.ETag;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SpeechMarkUtil {
@@ -70,6 +69,68 @@ public class SpeechMarkUtil {
         return result; // 결과 리스트 반환
     }
 
+    public static List<Map<String, Object>> parseSpeechMarks(String speechMarkStr) {
+        // speechMarkStr가 null이거나 빈 문자열인 경우 빈 리스트 반환
+        if (speechMarkStr == null || speechMarkStr.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
 
+        List<Map<String, Object>> speechMarks = new ArrayList<>();
 
+        // JSON 배열로 변환
+        JSONArray jsonArray = new JSONArray(speechMarkStr);
+
+        // JSON 객체를 Map으로 변환하여 리스트에 담기
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            Map<String, Object> speechMarkMap = new HashMap<>();
+
+            speechMarkMap.put("start", jsonObject.getInt("start"));
+            speechMarkMap.put("end", jsonObject.getInt("end"));
+            speechMarkMap.put("time", jsonObject.getInt("time"));
+            speechMarkMap.put("type", jsonObject.getString("type"));
+            speechMarkMap.put("value", jsonObject.getString("value"));
+
+            speechMarks.add(speechMarkMap);
+        }
+
+        return speechMarks;
+    }
+
+    public static String convertSpeechMarksToString(List<Map<String, Object>> speechMarks) {
+        // speechMarks가 null이거나 빈 리스트인 경우 빈 배열 반환
+        if (speechMarks == null || speechMarks.isEmpty()) {
+            return "[]";
+        }
+
+        JSONArray jsonArray = new JSONArray();
+
+        // Map을 JSON 객체로 변환하여 JSONArray에 추가
+        for (Map<String, Object> speechMark : speechMarks) {
+            JSONObject jsonObject = new JSONObject();
+
+            // 각 값에 대해 null 검증 후 추가 (Optional)
+            jsonObject.put("start", speechMark.getOrDefault("start", ""));
+            jsonObject.put("end", speechMark.getOrDefault("end", ""));
+            jsonObject.put("time", speechMark.getOrDefault("time", ""));
+            jsonObject.put("type", speechMark.getOrDefault("type", ""));
+
+            // value 필드에서 특수문자 처리 (String인지 확인 후)
+            Object value = speechMark.get("value");
+            if (value instanceof String) {
+                jsonObject.put("value", escapeSpecialCharacters((String) value));
+            } else {
+                jsonObject.put("value", value);
+            }
+
+            jsonArray.put(jsonObject);
+        }
+
+        return jsonArray.toString(); // JSON 배열을 문자열로 반환
+    }
+
+    private static String escapeSpecialCharacters(String input) {
+        // 기본적인 특수 문자 처리: 여기서는 쉼표(,)만을 예로 들지만, 필요에 따라 추가 가능
+        return input.replace("\"", "\\\"").replace(",", "\\,");
+    }
 }

@@ -1,19 +1,20 @@
 package site.balpyo.script.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.RequiredArgsConstructor;
 import site.balpyo.script.entity.Script;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+
+
+import static site.balpyo.script.service.SpeechMarkUtil.convertSpeechMarksToString;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class ScriptDto {
 
     private Long scriptId;
@@ -24,7 +25,7 @@ public class ScriptDto {
     private Boolean isGenerating;
     private String filePath;
     private Integer playTime;
-    private String speechMark;
+    private List<Map<String, Object>> speechMark;
     private String originalScript; // 원본대본
     private Integer speed; // Speed adjustment [-2, -1, 0, 1, 2]
     private boolean useAi;
@@ -34,10 +35,10 @@ public class ScriptDto {
     private String fcmToken;
     private String profileUrl;
     private InputStream audioStream;
-    private String speechMarks;
 
 
     public Script toEntity() {
+
         Script script = new Script();
         script.setScriptId(this.scriptId);
         script.setContent(this.content);
@@ -47,7 +48,7 @@ public class ScriptDto {
         script.setIsGenerating(this.isGenerating);
         script.setFilePath(this.filePath);
         script.setPlayTime(this.playTime);
-        script.setSpeechMark(this.speechMark);
+        script.setSpeechMark(convertSpeechMarksToString(this.speechMark));
         script.setOriginalScript(this.originalScript);
         script.setSpeed(this.speed);
         script.setUseAi(this.useAi);

@@ -137,9 +137,13 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public String checkUserVerify(@RequestParam("uid") String uid) {
+    public ResponseEntity<String> checkUserVerify(@RequestParam("uid") String uid) {
+        System.out.println("Received request to verify user with UID: " + uid);  // 로그 출력
+
         Optional<User> optionalUser = userRepository.findByVerifyCode(uid);
         if(optionalUser.isPresent()){
+            System.out.println("User found with UID: " + uid);  // 로그 출력
+
             Set<Role> roles = new HashSet<>();
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -147,14 +151,17 @@ public class AuthController {
 
             User user = optionalUser.get();
             user.setRoles(roles);
-
             userRepository.save(user);
 
-            return "success";
-        }else{
-            return "failed";
+            System.out.println("User roles updated and saved for UID: " + uid);  // 로그 출력
+
+            return ResponseEntity.ok("success");
+        } else {
+            System.out.println("No user found with UID: " + uid);  // 로그 출력
+            return ResponseEntity.badRequest().body("failed");
         }
     }
+
 
 
 
