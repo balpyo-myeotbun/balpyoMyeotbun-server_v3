@@ -26,7 +26,7 @@ public class Script {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long scriptId;
+    private Long id;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT")
@@ -80,7 +80,7 @@ public class Script {
 
     public ScriptDto toDto() {
         ScriptDto scriptDto = new ScriptDto();
-        scriptDto.setScriptId(this.scriptId);
+        scriptDto.setId(this.id);
         scriptDto.setContent(this.content);
         scriptDto.setTitle(this.title);
         scriptDto.setSecTime(this.secTime);

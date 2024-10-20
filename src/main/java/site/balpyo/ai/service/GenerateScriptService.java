@@ -1,5 +1,6 @@
 package site.balpyo.ai.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -22,7 +23,7 @@ public class GenerateScriptService {
     @Value("${spring.ai.openai.api-key}")
     String apiKey;
 
-
+    @Transactional
     public String createPromptString(String topic, String keywords, Integer sec) {
         int initialCharacterCount = 425;
         double characterPerSecond = (double) initialCharacterCount / 60.0;
@@ -39,7 +40,7 @@ public class GenerateScriptService {
         return requestPrompt;
     }
 
-
+    @Transactional
     public Generation getAiResultFromGpt(String input, Float temperature, Integer maxTokens) {
 
         OpenAiApi openAiApi = new OpenAiApi(apiKey);
@@ -53,7 +54,7 @@ public class GenerateScriptService {
         return chatModel.call(
                 new Prompt(input)).getResult();
     }
-
+    @Transactional
     public ScriptDto generateAiScriptAndSave(ScriptDto scriptDto){
 
         scriptDto.setIsGenerating(true);
@@ -64,7 +65,7 @@ public class GenerateScriptService {
 
         insertedScriptDto.setOriginalScript(inputValue);
         insertedScriptDto.setIsGenerating(false);
-        return scriptService.updateScript(insertedScriptDto.getScriptId(), insertedScriptDto);
+        return scriptService.updateScript(insertedScriptDto.getId(), insertedScriptDto);
     }
 
 

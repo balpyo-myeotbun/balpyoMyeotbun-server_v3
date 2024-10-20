@@ -17,7 +17,7 @@ import static site.balpyo.script.service.SpeechMarkUtil.convertSpeechMarksToStri
 @RequiredArgsConstructor
 public class ScriptDto {
 
-    private Long scriptId;
+    private Long id;
     private String content;
     private String title;
     private Integer secTime;
@@ -40,7 +40,7 @@ public class ScriptDto {
     public Script toEntity() {
 
         Script script = new Script();
-        script.setScriptId(this.scriptId);
+        script.setId(this.id);
         script.setContent(this.content);
         script.setTitle(this.title);
         script.setSecTime(this.secTime);
