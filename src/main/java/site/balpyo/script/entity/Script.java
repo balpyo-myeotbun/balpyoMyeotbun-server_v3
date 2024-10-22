@@ -1,6 +1,5 @@
 package site.balpyo.script.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,8 +46,7 @@ public class Script {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String filePath;
-
+    // private String filePath;
 
     private Integer playTime;
 
@@ -60,9 +58,7 @@ public class Script {
     @Column(columnDefinition = "LONGTEXT")
     private String originalScript; // 원본대본
 
-
     private Integer speed; // Speed adjustment [-2, -1, 0, 1, 2]
-
 
     private boolean useAi;
 
@@ -72,7 +68,7 @@ public class Script {
 
     private String keywords;
     private String fcmToken;
-    private String profileUrl;
+    // private String profileUrl;
 
     public Script(PollyService pollyService) {
         this.pollyService = pollyService;
@@ -86,17 +82,18 @@ public class Script {
         scriptDto.setSecTime(this.secTime);
         scriptDto.setVoiceFilePath(this.voiceFilePath);
         scriptDto.setIsGenerating(this.isGenerating);
-        scriptDto.setFilePath(this.filePath);
+        // scriptDto.setFilePath(this.filePath);
         scriptDto.setPlayTime(this.playTime);
         scriptDto.setSpeechMark(parseSpeechMarks(this.speechMark));
         scriptDto.setOriginalScript(this.originalScript);
         scriptDto.setSpeed(this.speed);
         scriptDto.setUseAi(this.useAi);
-        scriptDto.setTags(this.tags != null ? List.of(this.tags.split(",")) : null); // Assuming tags are stored as comma-separated values
+        scriptDto.setTags(this.tags != null ? List.of(this.tags.split(",")) : null); // Assuming tags are stored as
+                                                                                     // comma-separated values
         scriptDto.setTopic(this.topic);
         scriptDto.setKeywords(this.keywords);
         scriptDto.setFcmToken(this.fcmToken);
-        scriptDto.setProfileUrl(this.profileUrl);
+        // scriptDto.setProfileUrl(this.profileUrl);
 
         return scriptDto;
     }

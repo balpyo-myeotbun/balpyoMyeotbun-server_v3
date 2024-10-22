@@ -1,6 +1,9 @@
 package site.balpyo.script.service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.log4j.Log4j2;
+
+import org.checkerframework.checker.units.qual.t;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
@@ -19,12 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import site.balpyo.script.repository.ScriptSpecifications;
 
+import java.util.Optional;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static site.balpyo.script.service.SpeechMarkUtil.convertSpeechMarksToString;
 
+@Log4j2
 @Service
 public class ScriptService {
 
@@ -41,19 +46,17 @@ public class ScriptService {
     // Get all scripts and convert them to ScriptDto
     public List<ScriptDto> getAllScripts() {
 
-
         return repository.findAllByUser(authenticationService.authenticationToUser()).stream()
-                .map(Script::toDto)  // Convert each Script entity to ScriptDto
-                .toList();  // Convert the stream back to a list
+                .map(Script::toDto) // Convert each Script entity to ScriptDto
+                .toList(); // Convert the stream back to a list
     }
 
     @Transactional
     public ScriptDto getScriptById(Long id) {
-        return repository.findByIdAndUser(id,authenticationService.authenticationToUser())
+        return repository.findByIdAndUser(id, authenticationService.authenticationToUser())
                 .map(Script::toDto)
                 .orElse(null);
     }
-
 
     @Transactional
     public ScriptDto createScript(ScriptDto scriptDto) {
@@ -93,9 +96,8 @@ public class ScriptService {
                         updatedScript.setContent(existingScript.getContent());
                     }
 
-                    System.out.println("원래존재하던 태그"+existingScript.getTags().toString());
+                    System.out.println("원래존재하던 태그" + existingScript.getTags().toString());
                     updatedScript.setTags(existingScript.getTags());
-
 
                     // Add more comparisons for other fields as needed
                     // If any field was updated, save and return the updated entity
@@ -112,7 +114,7 @@ public class ScriptService {
     @Transactional
     // Delete a script by ID
     public void deleteScript(Long id) {
-        repository.deleteByIdAndUser(id,authenticationService.authenticationToUser());
+        repository.deleteByIdAndUser(id, authenticationService.authenticationToUser());
     }
 
     public List<ScriptDto> getAllScriptByTagAndIsGenerating(String tag, Boolean isGenerating, String searchValue) {
@@ -127,20 +129,22 @@ public class ScriptService {
     }
 
     @Transactional
-    public ScriptDto createScriptAndGetTime(ScriptDto scriptDto) throws CannotReadException, TagException, InvalidAudioFrameException, ReadOnlyFileException, IOException {
+    public ScriptDto createScriptAndGetTime(ScriptDto scriptDto)
+            throws CannotReadException, TagException, InvalidAudioFrameException, ReadOnlyFileException, IOException {
         PollyDTO pollyDTO = new PollyDTO();
         pollyDTO.setText(scriptDto.getContent());
         pollyDTO.setSpeed(scriptDto.getSpeed());
 
         UploadResultDTO uploadResultDTO = pollyService.synthesizeAndUploadSpeech(pollyDTO);
 
-        scriptDto.setFilePath(uploadResultDTO.getProfileUrl());
+        scriptDto.setVoiceFilePath(uploadResultDTO.getVoiceFilePath());
         scriptDto.setPlayTime(uploadResultDTO.getPlayTime());
         scriptDto.setTags(List.of(ETag.TIME.name()));
         scriptDto.setSpeechMark(uploadResultDTO.getSpeechMarks());
 
         return createScript(scriptDto);
     }
+
     @Transactional
     public ScriptDto createNoteScript(ScriptDto scriptDto) {
         scriptDto.setIsGenerating(false);
@@ -153,51 +157,35 @@ public class ScriptService {
 
         return savedScript.toDto();
     }
+
     @Transactional
     public ScriptDto updateScript(Long id, ScriptDto scriptDto) {
 
-        return repository.findByIdAndUser(id, authenticationService.authenticationToUser())
-                .map(existingScript -> {
-                    boolean isUpdated = false; // Flag to track if any changes were made
+        scriptDto.setUseAi(true);
 
-                    // Create updated script from DTO
-                    Script updatedScript = scriptDto.toEntity();
-                    updatedScript.setId(existingScript.getId());
+        log.info("Updating script with ID: {}", id);
+        log.info(scriptDto);
 
-                    // Check if the content or speed has changed, update if necessary
-                    if (!existingScript.getContent().equals(scriptDto.getContent()) ||
-                            !existingScript.getSpeed().equals(scriptDto.getSpeed())) {
+        Script script = repository.findByIdAndUser(id, authenticationService.authenticationToUser())
+                .orElseThrow(() -> new IllegalArgumentException("Script not found"));
 
-                        PollyDTO pollyDTO = new PollyDTO();
-                        pollyDTO.setText(scriptDto.getContent());
-                        pollyDTO.setSpeed(scriptDto.getSpeed());
+        if (script != null) {
+            log.info("---------------- script found ----------------");
+            Script updatedScript = scriptDto.toEntity();
+            updatedScript.setId(id);
+            updatedScript.setTags(ETag.SCRIPT.name());
+            updatedScript.setUser(authenticationService.authenticationToUser());
+            Script savedScript = repository.save(updatedScript);
+            return savedScript.toDto();
+        } else {
+            log.info("---------------- script not found ----------------");
+            Script newScript = scriptDto.toEntity();
+            newScript.setTags(ETag.SCRIPT.name());
+            newScript.setUser(authenticationService.authenticationToUser());
+            Script savedScript = repository.save(newScript);
+            return savedScript.toDto();
+        }
 
-                        UploadResultDTO uploadResultDTO = pollyService.synthesizeAndUploadSpeech(pollyDTO);
-
-                        updatedScript.setFilePath(uploadResultDTO.getProfileUrl());
-                        updatedScript.setPlayTime(uploadResultDTO.getPlayTime());
-                        updatedScript.setSpeechMark(convertSpeechMarksToString(uploadResultDTO.getSpeechMarks()));
-
-                        isUpdated = true; // Mark as updated since content or speed has changed
-                    } else {
-                        // Keep the existing values if no changes were detected
-                        updatedScript.setFilePath(existingScript.getFilePath());
-                        updatedScript.setPlayTime(existingScript.getPlayTime());
-                        updatedScript.setSpeechMark(existingScript.getSpeechMark());
-                    }
-
-                    System.out.println("원래존재하던 태그"+existingScript.getTags().toString());
-                    updatedScript.setTags(existingScript.getTags());
-
-                    // Save only if any changes were made
-                    if (isUpdated) {
-                        Script savedScript = repository.save(updatedScript);
-                        return savedScript.toDto();
-                    }
-
-                    return existingScript.toDto(); // Return the existing script if no changes
-                }).orElse(null);
     }
 
 }
-

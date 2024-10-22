@@ -11,7 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadResultDTO {
-    private String profileUrl;
+    private String voiceFilePath;
     private int playTime;
     private int speed;
     private List<Map<String, Object>> speechMarks;

@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-
 import static site.balpyo.script.service.SpeechMarkUtil.convertSpeechMarksToString;
 
 @Data
@@ -23,7 +22,7 @@ public class ScriptDto {
     private Integer secTime;
     private String voiceFilePath;
     private Boolean isGenerating;
-    private String filePath;
+    // private String filePath;
     private Integer playTime;
     private List<Map<String, Object>> speechMark;
     private String originalScript; // 원본대본
@@ -33,9 +32,8 @@ public class ScriptDto {
     private String topic;
     private String keywords;
     private String fcmToken;
-    private String profileUrl;
-    private InputStream audioStream;
-
+    // private String profileUrl;
+    // private InputStream audioStream;
 
     public Script toEntity() {
 
@@ -46,17 +44,18 @@ public class ScriptDto {
         script.setSecTime(this.secTime);
         script.setVoiceFilePath(this.voiceFilePath);
         script.setIsGenerating(this.isGenerating);
-        script.setFilePath(this.filePath);
+        // script.setFilePath(this.voiceFilePath);
         script.setPlayTime(this.playTime);
         script.setSpeechMark(convertSpeechMarksToString(this.speechMark));
         script.setOriginalScript(this.originalScript);
         script.setSpeed(this.speed);
         script.setUseAi(this.useAi);
-        script.setTags(this.tags != null ? String.join(",", this.tags) : null); // Converting list back to comma-separated values
+        script.setTags(this.tags != null ? String.join(",", this.tags) : null); // Converting list back to
+                                                                                // comma-separated values
         script.setTopic(this.topic);
         script.setKeywords(this.keywords);
         script.setFcmToken(this.fcmToken);
-        script.setProfileUrl(this.profileUrl);
+        // script.setProfileUrl(this.profileUrl);
 
         return script;
     }

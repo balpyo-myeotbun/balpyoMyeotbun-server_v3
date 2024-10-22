@@ -16,7 +16,6 @@ import site.balpyo.ai.dto.upload.UploadFileDTO;
 import site.balpyo.ai.dto.upload.UploadResultDTO;
 import site.balpyo.s3.S3Client;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class UploadController {
     private String bucketName;
     private final S3Client s3Client;
 
-    //post 방식으로 파일 등록
+    // post 방식으로 파일 등록
     public UploadResultDTO upload(UploadFileDTO uploadFileDTO) throws IOException {
 
         AmazonS3 s3 = s3Client.getAmazonS3();
@@ -65,14 +64,13 @@ public class UploadController {
                 s3.putObject(bucketName, objectPath, originalFile);
                 setAcl(s3, objectPath);
 
-
             } finally {
                 assert originalFile != null;
                 originalFile.delete();
             }
 
             return UploadResultDTO.builder()
-                    .profileUrl(profileURL)
+                    .voiceFilePath(profileURL)
                     .build();
 
         } else {

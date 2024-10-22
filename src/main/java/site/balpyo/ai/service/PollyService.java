@@ -234,7 +234,7 @@ public class PollyService {
         log.info("--------------------- " + durationInSeconds);
 
         return UploadResultDTO.builder()
-                .profileUrl(baseUploadURL)
+                .voiceFilePath(baseUploadURL)
                 .playTime(durationInSeconds)
                 .speed(pollyDTO.getSpeed())
                 .speechMarks(speechMarksList)
