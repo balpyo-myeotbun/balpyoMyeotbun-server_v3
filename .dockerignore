@@ -1,0 +1,10 @@
+.git
+.github
+scripts
+ .dockerignore
+ Dockerfile
+
+
+README.md
+
+/src/test/
