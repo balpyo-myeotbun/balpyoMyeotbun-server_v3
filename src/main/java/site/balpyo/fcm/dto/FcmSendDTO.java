@@ -10,6 +10,7 @@ import lombok.*;
  * @since : 06/20/2024
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FcmSendDTO {

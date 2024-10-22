@@ -89,7 +89,7 @@ public class FcmServiceImpl implements FcmService {
     }
 
     private String getAccessToken() throws IOException {
-        String firebaseConfigPath = "firebase/balpyo-myeotbun-firebase-adminsdk-7vz0s-bc87366e4d.json";
+        String firebaseConfigPath = "firebase/balpyo-myeotbun-firebase-adminsdk-7vz0s-f346c38bab.json";
 
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
