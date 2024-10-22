@@ -24,7 +24,6 @@ import site.balpyo.ai.dto.SynthesizeSpeechResultDTO;
 import site.balpyo.ai.dto.upload.UploadResultDTO;
 import site.balpyo.s3.S3Client;
 
-
 import java.io.*;
 import java.net.URL;
 
@@ -62,7 +61,6 @@ public class PollyService {
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .withRegion(Regions.AP_NORTHEAST_2) // AWS 리전 설정
                 .build();
-
 
         // 빠르기 계산
         float relativeSpeed = calculateRelativeSpeed(speed);
@@ -203,7 +201,7 @@ public class PollyService {
                         ssmlBuilder.append("<break time=\"2000ms\"/>");
                         i += 8; // "PPT 넘김+2"의 길이만큼 인덱스 증가
                     }
-                    break;    
+                    break;
                 default:
                     // 기본 문자 처리
                     ssmlBuilder.append(ch);
@@ -238,13 +236,14 @@ public class PollyService {
         return UploadResultDTO.builder()
                 .profileUrl(baseUploadURL)
                 .playTime(durationInSeconds)
+                .speed(pollyDTO.getSpeed())
                 .speechMarks(speechMarksList)
                 .build();
     }
 
     private Map<String, Object> uploadToS3(InputStream inputStream, String fileName) {
         log.info("--------------------- " + fileName);
-    
+
         // InputStream의 크기를 계산하기 위해 ByteArrayOutputStream을 사용
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -256,62 +255,60 @@ public class PollyService {
         } catch (IOException e) {
             log.error("Error reading input stream", e);
         }
-    
+
         byte[] data = byteArrayOutputStream.toByteArray();
         InputStream byteArrayInputStream = new ByteArrayInputStream(data);
-    
+
         // S3에 업로드할 ObjectMetadata 생성
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(data.length); // Content-Length 설정
-    
+
         // S3에 업로드
         s3Client.getAmazonS3().putObject(bucketName, fileName, byteArrayInputStream, metadata);
-    
+
         // ACL 설정
         setAcl(s3Client.getAmazonS3(), fileName);
-    
+
         // 업로드된 파일의 URL 생성
         String baseUploadURL = "https://balpyo-bucket.s3.ap-northeast-2.amazonaws.com/" + fileName;
-    
+
         log.info("업로드 위치------" + baseUploadURL);
-    
+
         // 임시 파일로 저장하여 처리
         int durationInSeconds = 0; // 초기화
-    
+
         try {
             URL url = new URL(baseUploadURL);
             InputStream targetStream = url.openStream();
             fileName = Paths.get(url.getPath()).getFileName().toString();
             File localFile = new File(System.getProperty("java.io.tmpdir"), fileName);
-    
+
             log.info("Download------" + localFile);
             Files.copy(targetStream, localFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             targetStream.close(); // 스트림 닫기
-    
+
             // MP3 파일의 재생 시간 계산
             MP3File mp3File = new MP3File(localFile);
             log.info("mp3 file" + mp3File);
-    
+
             MP3AudioHeader audioHeader = (MP3AudioHeader) mp3File.getAudioHeader();
             durationInSeconds = audioHeader.getTrackLength();
-    
+
             log.info("------------ 재생시간: " + durationInSeconds + "초");
-    
+
             // 임시 파일 삭제
             localFile.delete();
-    
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-    
+
         // 결과를 Map에 담아 반환
         Map<String, Object> result = new HashMap<>();
         result.put("baseUploadURL", baseUploadURL);
         result.put("durationInSeconds", durationInSeconds);
         return result;
     }
-    
-
 
     public void setAcl(AmazonS3 s3, String objectPath) {
         AccessControlList objectAcl = s3.getObjectAcl(bucketName, objectPath);

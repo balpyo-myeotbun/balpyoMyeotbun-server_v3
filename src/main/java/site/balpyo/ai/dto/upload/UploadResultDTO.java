@@ -13,6 +13,7 @@ import java.util.Map;
 public class UploadResultDTO {
     private String profileUrl;
     private int playTime;
+    private int speed;
     private List<Map<String, Object>> speechMarks;
 
 }
