@@ -94,30 +94,36 @@ public class GenerateScriptService {
                 new Prompt(input)).getResult();
     }
 
-    @Transactional
+
     public ScriptDto generateAiScriptAndSave(ScriptDto scriptDto) {
 
         scriptDto.setIsGenerating(true);
         scriptDto.setUseAi(true);
 
-        FcmSendDTO fcmSendDTO = FcmSendDTO.builder()
-                .token(scriptDto.getFcmToken())
-                .title("발표몇분 FCM 테스트...")
-                .body("발표대본 생성 완료")
-                .script_id(scriptDto.getId().toString())
-                .build();
+
 
         ScriptDto insertedScriptDto = scriptService.createScript(scriptDto);
+
+        System.out.println(insertedScriptDto.toString());
         String inputValue = getAiResultFromGpt(
                 createPromptString(scriptDto.getTopic(), scriptDto.getKeywords(), scriptDto.getSecTime()), null, null)
                 .getOutput().getContent();
         insertedScriptDto.setOriginalScript(inputValue);
         insertedScriptDto.setIsGenerating(false);
+        ScriptDto inserted = scriptService.updateUncalScript(insertedScriptDto.getId(), insertedScriptDto);
+
+        FcmSendDTO fcmSendDTO = FcmSendDTO.builder()
+                .token(scriptDto.getFcmToken())
+                .title("발표몇분 FCM 테스트...")
+                .body("발표대본 생성 완료")
+                .script_id(insertedScriptDto.getId().toString())
+                .build();
+
         try {
             Mono<Integer> fcm_result = fcmService.sendMessageTo(fcmSendDTO);
             log.info("[-] FCM message sent successfully");
             log.info(fcm_result);
-            return scriptService.updateScript(insertedScriptDto.getId(), insertedScriptDto);
+            return inserted;
         } catch (IOException e) {
             log.error("[-] Failed to send FCM message", e);
         }

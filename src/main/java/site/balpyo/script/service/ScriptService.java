@@ -73,42 +73,28 @@ public class ScriptService {
 
     @Transactional
     public ScriptDto updateUncalScript(Long id, ScriptDto scriptDto) {
-        return repository.findByIdAndUser(id, authenticationService.authenticationToUser())
-                .map(existingScript -> {
-                    boolean isUpdated = false; // Flag to track if any changes were made
 
-                    // Create updated script from DTO
-                    Script updatedScript = scriptDto.toEntity();
-                    updatedScript.setId(existingScript.getId());
+        // ID와 User로 Script 찾기
+        Optional<Script> opExistingScript = repository.findByIdAndUser(id, authenticationService.authenticationToUser());
 
-                    // Compare fields and update only if necessary
-                    if (!existingScript.getTitle().equals(scriptDto.getTitle())) {
-                        updatedScript.setTitle(scriptDto.getTitle());
-                        isUpdated = true;
-                    } else {
-                        updatedScript.setTitle(existingScript.getTitle());
-                    }
+        if (opExistingScript.isPresent()) {
+            // Script가 존재하면 업데이트
+            Script script = opExistingScript.get();
+            script.setTitle(scriptDto.getTitle());
+            if(scriptDto.getOriginalScript()!=null){
+                script.setContent(scriptDto.getOriginalScript());
+            }
+            if(scriptDto.getIsGenerating()!=null){
+                script.setIsGenerating(scriptDto.getIsGenerating());
+            }
 
-                    if (!existingScript.getContent().equals(scriptDto.getContent())) {
-                        updatedScript.setContent(scriptDto.getContent());
-                        isUpdated = true;
-                    } else {
-                        updatedScript.setContent(existingScript.getContent());
-                    }
-
-                    System.out.println("원래존재하던 태그" + existingScript.getTags().toString());
-                    updatedScript.setTags(existingScript.getTags());
-
-                    // Add more comparisons for other fields as needed
-                    // If any field was updated, save and return the updated entity
-                    if (isUpdated) {
-                        Script savedScript = repository.save(updatedScript);
-                        return savedScript.toDto();
-                    }
-
-                    // If no changes, return the existing script without updating
-                    return existingScript.toDto();
-                }).orElse(null);
+            script.setOriginalScript(scriptDto.getOriginalScript());
+            Script savedScript = repository.save(script);
+            return savedScript.toDto();
+        } else {
+            // Script가 없으면 예외 발생
+            throw new IllegalArgumentException("Script not found with ID: " + id);
+        }
     }
 
     @Transactional
@@ -161,13 +147,25 @@ public class ScriptService {
     @Transactional
     public ScriptDto updateScript(Long id, ScriptDto scriptDto) {
 
-        scriptDto.setUseAi(true);
-
         log.info("Updating script with ID: {}", id);
         log.info(scriptDto);
 
         Script script = repository.findByIdAndUser(id, authenticationService.authenticationToUser())
                 .orElseThrow(() -> new IllegalArgumentException("Script not found"));
+
+
+        PollyDTO pollyDTO = new PollyDTO();
+        pollyDTO.setText(scriptDto.getContent());
+        pollyDTO.setSpeed(scriptDto.getSpeed());
+
+        UploadResultDTO uploadResultDTO = pollyService.synthesizeAndUploadSpeech(pollyDTO);
+
+        scriptDto.setVoiceFilePath(uploadResultDTO.getVoiceFilePath());
+        scriptDto.setPlayTime(uploadResultDTO.getPlayTime());
+        scriptDto.setTags(List.of(ETag.TIME.name()));
+        scriptDto.setSpeechMark(uploadResultDTO.getSpeechMarks());
+        scriptDto.setSpeed(scriptDto.getSpeed());
+
 
         if (script != null) {
             log.info("---------------- script found ----------------");

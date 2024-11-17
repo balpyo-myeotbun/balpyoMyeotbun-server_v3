@@ -25,6 +25,7 @@ import site.balpyo.auth.entity.User;
 import site.balpyo.auth.repository.RoleRepository;
 import site.balpyo.auth.repository.UserRepository;
 import site.balpyo.auth.security.jwt.JwtUtils;
+import site.balpyo.auth.service.AuthenticationService;
 import site.balpyo.auth.service.EmailService;
 import site.balpyo.auth.service.RandomAdjectiveAnimalGenerator;
 import site.balpyo.auth.service.UserDetailsImpl;
@@ -49,9 +50,12 @@ public class AuthController {
 
     @Autowired
     RoleRepository roleRepository;
-
+@Autowired
+PasswordEncoder passwordEncoder;
     @Autowired
     PasswordEncoder encoder;
+    @Autowired
+    AuthenticationService authenticationService;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -162,6 +166,52 @@ public class AuthController {
         }
     }
 
+
+    @GetMapping("/check-user-password")
+    public Boolean checkUserPassword(@RequestParam String currentPassword) {
+        // 인증된 사용자 정보 가져오기
+        User user = authenticationService.authenticationToUser();
+
+        // 저장된 비밀번호와 사용자가 입력한 비밀번호 비교
+        return passwordEncoder.matches(currentPassword, user.getPassword());
+    }
+
+    @PutMapping("/change-user-password")
+    public ResponseEntity<?> changeUserPassword(@RequestParam String currentPassword, @RequestParam String newPassword) {
+
+        User user = authenticationService.authenticationToUser();
+
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: Current password is incorrect!"));
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("Password updated successfully!"));
+    }
+
+
+    @PutMapping("/change-username")
+    public ResponseEntity<?> changeUserNickname(@RequestParam String newUsername) {
+        User user = authenticationService.authenticationToUser();
+
+        // 닉네임 중복 확인
+        if (userRepository.existsByUsername(newUsername)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: Nickname is already in use!"));
+        }
+
+        // 닉네임 업데이트
+        user.setUsername(newUsername);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("User nickname updated successfully!"));
+    }
 
 
 
