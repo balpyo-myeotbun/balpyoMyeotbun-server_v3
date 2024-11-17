@@ -87,8 +87,9 @@ public class ScriptService {
             if(scriptDto.getIsGenerating()!=null){
                 script.setIsGenerating(scriptDto.getIsGenerating());
             }
-
-            script.setOriginalScript(scriptDto.getOriginalScript());
+            if(scriptDto.getContent()!=null){
+                script.setContent(scriptDto.getContent());
+            }
             Script savedScript = repository.save(script);
             return savedScript.toDto();
         } else {
