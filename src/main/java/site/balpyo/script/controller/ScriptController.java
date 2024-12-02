@@ -70,6 +70,14 @@ public class ScriptController {
         return service.createNoteScript(scriptDto);
     }
 
+    // 새로운 노트 스크립트를 생성하는 API
+    @PreAuthorize("hasRole('UNVERIFIED_USER') or hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @Operation(summary = "플로우 스크립트 생성", description = "플로우 형식의 스크립트를 생성합니다. 스크립트는 ScriptDto로 반환됩니다.")
+    @PostMapping("/flow")
+    public ScriptDto createFlowScript(@RequestBody ScriptDto scriptDto) {
+        return service.createFlowScript(scriptDto);
+    }
+
     // 스크립트를 생성하고 그 발표 시간을 계산하여 반환하는 API
     @PreAuthorize("hasRole('UNVERIFIED_USER') or hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @Operation(

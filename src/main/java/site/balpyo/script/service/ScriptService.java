@@ -146,6 +146,19 @@ public class ScriptService {
     }
 
     @Transactional
+    public ScriptDto createFlowScript(ScriptDto scriptDto) {
+        scriptDto.setIsGenerating(false);
+        scriptDto.setUseAi(false);
+
+        Script script = scriptDto.toEntity();
+        script.setTags(ETag.FLOW.name());
+        script.setUser(authenticationService.authenticationToUser());
+        Script savedScript = repository.save(script);
+
+        return savedScript.toDto();
+    }
+
+    @Transactional
     public ScriptDto updateScript(Long id, ScriptDto scriptDto) {
 
         log.info("Updating script with ID: {}", id);
