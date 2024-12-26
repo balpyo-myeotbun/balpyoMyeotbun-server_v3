@@ -84,6 +84,23 @@ PasswordEncoder passwordEncoder;
                 roles));
     }
 
+
+    @PostMapping("/user-detail")
+    public ResponseEntity<?> getUserDetail() {
+        return ResponseEntity.ok(authenticationService.authenticationToUser());
+    }
+
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUser() {
+        if(authenticationService.authenticationToUser()!=null){
+            userRepository.delete(authenticationService.authenticationToUser());
+        }
+
+        return ResponseEntity.ok("User Deleted");
+    }
+
+
+
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest) {
 

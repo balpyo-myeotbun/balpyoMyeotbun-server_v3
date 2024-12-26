@@ -93,6 +93,7 @@ public class Script {
         scriptDto.setTopic(this.topic);
         scriptDto.setKeywords(this.keywords);
         scriptDto.setFcmToken(this.fcmToken);
+        scriptDto.setCreatedAt(this.createdAt);
         // scriptDto.setProfileUrl(this.profileUrl);
 
         return scriptDto;

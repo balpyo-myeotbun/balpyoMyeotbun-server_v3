@@ -7,6 +7,10 @@ public class ScriptSpecifications {
     public static Specification<Script> hasTag(String tag) {
         return (root, query, criteriaBuilder) -> tag == null ? null : criteriaBuilder.like(root.get("tags"), "%" + tag + "%");
     }
+    public static Specification<Script> belongsToUser(String username) {
+        return (root, query, criteriaBuilder) ->
+                username == null ? null : criteriaBuilder.equal(root.get("user").get("username"), username);
+    }
 
     public static Specification<Script> isGenerating(Boolean isGenerating) {
         return (root, query, criteriaBuilder) -> isGenerating == null ? null : criteriaBuilder.equal(root.get("isGenerating"), isGenerating);

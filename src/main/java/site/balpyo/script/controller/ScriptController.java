@@ -185,4 +185,13 @@ public class ScriptController {
     public ScriptDto updateUncalScript(@PathVariable Long id, @RequestBody ScriptDto scriptDto) {
         return service.updateUncalScript(id, scriptDto);
     }
+
+
+    @GetMapping("/search")
+    public List<ScriptDto> searchScripts(
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) Boolean isGenerating,
+            @RequestParam(required = false) String searchValue) {
+        return service.getAllScriptByTagAndIsGenerating(tag, isGenerating, searchValue);
+    }
 }

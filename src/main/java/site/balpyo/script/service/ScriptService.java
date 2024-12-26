@@ -13,6 +13,7 @@ import site.balpyo.ai.controller.PollyController;
 import site.balpyo.ai.dto.PollyDTO;
 import site.balpyo.ai.dto.upload.UploadResultDTO;
 import site.balpyo.ai.service.PollyService;
+import site.balpyo.auth.entity.User;
 import site.balpyo.auth.service.AuthenticationService;
 import site.balpyo.script.dto.ScriptDto;
 import site.balpyo.script.entity.ETag;
@@ -104,11 +105,15 @@ public class ScriptService {
         repository.deleteByIdAndUser(id, authenticationService.authenticationToUser());
     }
 
+
     public List<ScriptDto> getAllScriptByTagAndIsGenerating(String tag, Boolean isGenerating, String searchValue) {
+
+        User user = authenticationService.authenticationToUser();
+
         Specification<Script> spec = Specification.where(ScriptSpecifications.hasTag(tag))
                 .and(ScriptSpecifications.isGenerating(isGenerating))
-                .and(ScriptSpecifications.containsSearchValue(searchValue));
-
+                .and(ScriptSpecifications.containsSearchValue(searchValue))
+                .and(ScriptSpecifications.belongsToUser(user.getUsername()));
         List<Script> scripts = repository.findAll(spec);
 
         // ScriptDto로 변환하여 반환

@@ -3,9 +3,11 @@ package site.balpyo.script.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import site.balpyo.script.entity.Script;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,7 @@ public class ScriptDto {
     private String topic;
     private String keywords;
     private String fcmToken;
+    private LocalDateTime createdAt;
     // private String profileUrl;
     // private InputStream audioStream;
 
